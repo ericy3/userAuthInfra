@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"lambda-func/app"
 )
 
 type MyEvent struct {
@@ -19,5 +20,6 @@ func HandleRequest(event MyEvent) (string, error) {
 }
 
 func main() {
+	app := app.NewApp()
 	lambda.Start(HandleRequest)
 }
