@@ -41,6 +41,7 @@ func ValidateJWTMiddleware(next func(request events.APIGatewayProxyRequest) (eve
 				StatusCode: http.StatusUnauthorized,
 			}, nil
 		}
+		// "next" allows you to call next function in function chaining
 		return next(request)
 	}
 }

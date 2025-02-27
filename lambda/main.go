@@ -2,24 +2,31 @@ package main
 
 import (
 	"fmt"
-	"lambda-func/app"
-	"net/http"
-
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"lambda-func/app"
+	"lambda-func/middleware"
+	"net/http"
 )
 
 type MyEvent struct {
 	Username string `json:"username"`
 }
 
-// Take in a payload and
+// Take in a payload and process
 func HandleRequest(event MyEvent) (string, error) {
 	if event.Username == "" {
 		return "", fmt.Errorf("username cannot be empty")
 	}
 
 	return fmt.Sprintf("Successfully called by - %s", event.Username), nil
+}
+
+func ProtectedHandler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return events.APIGatewayProxyResponse{
+		Body:       "This is a secret path",
+		StatusCode: http.StatusOK,
+	}, nil
 }
 
 func main() {
@@ -30,6 +37,8 @@ func main() {
 			return myApp.ApiHandler.RegisterUserHandler(request)
 		case "/login":
 			return myApp.ApiHandler.LoginUser(request)
+		case "/protected":
+			return middleware.ValidateJWTMiddleware(ProtectedHandler)(request)
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not found",
